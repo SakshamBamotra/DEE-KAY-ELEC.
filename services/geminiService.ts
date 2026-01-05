@@ -1,7 +1,10 @@
 import { GoogleGenAI, Type } from "@google/genai";
 import { Product, Category } from "../types";
 
-const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+// Initialize safely. If the key is missing (e.g. during first deploy), 
+// we use a dummy string so the app loads, but specific calls will fail gracefully later.
+const apiKey = process.env.API_KEY || "missing-api-key";
+const ai = new GoogleGenAI({ apiKey });
 
 const MODEL_NAME = 'gemini-3-flash-preview';
 
@@ -9,7 +12,10 @@ const MODEL_NAME = 'gemini-3-flash-preview';
  * Generates a marketing description based on product name and category.
  */
 export const generateProductDetails = async (name: string, category: string): Promise<{ description: string }> => {
-  if (!process.env.API_KEY) throw new Error("API Key missing");
+  if (!process.env.API_KEY) {
+    console.warn("API Key is missing. Please add API_KEY to Vercel Environment Variables.");
+    return { description: "AI generation unavailable (Missing API Key)." };
+  }
 
   const prompt = `
     I am adding a product to my electronics shop inventory.
@@ -53,7 +59,7 @@ export const generateProductDetails = async (name: string, category: string): Pr
  * Analyzes the inventory to provide business insights.
  */
 export const analyzeInventory = async (products: Product[]): Promise<string> => {
-  if (!process.env.API_KEY) return "API Key missing. Cannot analyze inventory.";
+  if (!process.env.API_KEY) return "API Key missing. Please check your settings.";
 
   // Simplify payload to save tokens
   const inventorySummary = products.map(p => ({
