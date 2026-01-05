@@ -3,7 +3,8 @@ import react from '@vitejs/plugin-react';
 
 // https://vitejs.dev/config/
 export default defineConfig(({ mode }) => {
-  const env = loadEnv(mode, (process as any).cwd(), '');
+  // Use '.' instead of process.cwd() to avoid type error with 'Process' interface
+  const env = loadEnv(mode, '.', '');
   return {
     plugins: [react()],
     define: {
